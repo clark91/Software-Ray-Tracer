@@ -4,8 +4,8 @@
 #include<algorithm>
 #include<cmath>
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 1280
+#define SCREEN_WIDTH 3840
+#define SCREEN_HEIGHT 3840
 
 struct Vector3f {
   float x, y, z;
@@ -225,6 +225,7 @@ int main(){
     i++;
   }*/
 
+  FileTools 
   render(triangles, lights);
   return 0;
 }
