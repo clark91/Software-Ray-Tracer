@@ -241,10 +241,14 @@ void render(std::vector<tri> tris, std::vector<Light> lights){
 
 int main(){
 
+  Material ivory(Vector3f(0.6, 0.3, 0.1), 50., Vector3f(0.4,0.4,0.3));
+  Material red_rubber(Vector3f(0.9,0.1,0.0), 10., Vector3f(0.3,0.1,0.1));
+  Material mirror(Vector3f(0.0,10.0,0.8), 1425., Vector3f(1.0,1.0,1.0));
+
   std::vector<tri> triangles;
   
-  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(1,0,0), 0.2, Vector3f(1,0,0)))); // Red Test Triangle
-  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(0,1,0), 0.5, Vector3f(1,0.5,0.5)))); // Green Test Triangle
+  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), red_rubber)); 
+  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), mirror)); 
 
   std::vector<Light> lights;
 
