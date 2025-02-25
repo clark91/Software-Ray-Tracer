@@ -3,10 +3,11 @@
 #include<vector>
 #include<algorithm>
 #include<cmath>
+#include<thread>
 #include "geometry.hpp"
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 1280
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 1000
 
 Vector3f reflect (Vector3f I, Vector3f N){
   return (I - N * I.dot(N) * 2.f);
@@ -65,22 +66,49 @@ Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::ve
   
 }
 
-void render(std::vector<tri> tris, std::vector<Light> lights){
+void renderTile(int startX, int endX, int startY, int endY, std::vector<tri> &tris, std::vector<Light> &lights, std::vector<Vector3f> &framebuffer, int width, int height, float fov) {
+  Vector3f cameraPos = Vector3f(0, 0, 0);
+
+  for (int j = startY; j < endY; j++) {
+      for (int i = startX; i < endX; i++) {
+          float x = (2 * (i + 0.5) / (float)width - 1) * tan(fov / 2.) * width / (float)height;
+          float y = -(2 * (j + 0.5) / (float)height - 1) * tan(fov / 2.);
+          Vector3f dir = Vector3f(x, y, -1).normalize();
+          framebuffer[i + j * width] = castRay(cameraPos, dir, tris, lights);
+      }
+  }
+}
+
+void render(std::vector<tri> &tris, std::vector<Light> &lights) {
   const int width = SCREEN_WIDTH;
   const int height = SCREEN_HEIGHT;
-  Vector3f cameraPos = Vector3f(0,0,0);
-  const float fov = (120.f/180.f) * M_PI;
+  const float fov = (120.f / 180.f) * M_PI;
 
-  std::vector<Vector3f> framebuffer(width*height);
+  std::vector<Vector3f> framebuffer(width * height);
 
-  for (size_t j = 0; j < height; j++){
-    for (size_t i = 0; i < width; i++){
-      float x =  (2*(i + 0.5)/(float)width  - 1)*tan(fov/2.)*width/(float)height;
-      float y = -(2*(j + 0.5)/(float)height - 1)*tan(fov/2.);
-      Vector3f dir = Vector3f(x, y, -1).normalize();
-      framebuffer[i+j*width] = castRay(cameraPos, dir, tris, lights);
-    }
+  int numThreads = std::thread::hardware_concurrency();
+  std::vector<std::thread> threads;
+
+  int tileSizeX = width / numThreads;
+  int tileSizeY = height / numThreads;
+
+  for (int y = 0; y < numThreads; y++) {
+      for (int x = 0; x < numThreads; x++) {
+          int startX = x * tileSizeX;
+          int endX = (x == numThreads - 1) ? width : startX + tileSizeX;
+
+          int startY = y * tileSizeY;
+          int endY = (y == numThreads - 1) ? height : startY + tileSizeY;
+
+          threads.push_back(std::thread(renderTile, startX, endX, startY, endY, std::ref(tris), std::ref(lights), std::ref(framebuffer), width, height, fov));
+      }
   }
+
+  for (auto &t : threads) {
+      t.join();
+  }
+
+  std::cout << "Rendering Complete\n";
 
   std::ofstream ofs;
   ofs.open("./out.ppm");
@@ -101,14 +129,17 @@ int main(){
   Material red_rubber(Vector3f(0.9,0.1,0.0), 10., Vector3f(0.3,0.1,0.1));
   Material mirror(Vector3f(0.0,10.0,0.8), 1425., Vector3f(1.0,1.0,1.0));
 
-  std::vector<tri> triangles;
+  //std::vector<tri> triangles;
   
-  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), red_rubber)); 
-  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), mirror)); 
+  //triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), red_rubber)); 
+  //triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), mirror)); 
+
+  std::vector<tri> triangles = parseObj();
+  
 
   std::vector<Light> lights;
 
-  lights.push_back(Light(Vector3f( 30, 50, -25),0.7f));
+  lights.push_back(Light(Vector3f( 30, 50, -25),5.0f));
 
   render(triangles, lights);
   return 0;

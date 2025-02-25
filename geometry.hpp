@@ -105,6 +105,13 @@ struct tri{
     E2 = c - a;
   }
 
+  tri() {}
+
+  void updateEdges(){
+    E1 = b - a;
+    E2 = c - a;
+  }
+
   HitInfo intersectsRay(Vector3f &orig, Vector3f &dir){
     
     HitInfo hitInfo;
@@ -148,3 +155,5 @@ struct tri{
     return hitInfo;
   }
 };
+
+std::vector<tri> parseObj();
