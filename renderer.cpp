@@ -85,10 +85,10 @@ struct Light {
 
 struct Material{
   Vector3f color;
-  Vector2f albedo;
+  Vector3f albedo;
   float specular_exponent;
 
-  Material(Vector3f c, float s, Vector2f a) : color(c), specular_exponent(s),albedo(a){}
+  Material(Vector3f c, float s, Vector3f a) : color(c), specular_exponent(s),albedo(a){}
 
   Material() {};
 };
@@ -168,7 +168,7 @@ HitInfo sceneHit(Vector3f &orig, Vector3f &dir, std::vector<tri> tris){
   return closest;
 }
 
-Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::vector<Light> &lights){
+Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::vector<Light> &lights, size_t depth = 0){
   HitInfo closestTri;
   closestTri.distance = 999999.f;
   closestTri.didHit = false;
@@ -180,9 +180,13 @@ Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::ve
     }
   }
 
-  if (!closestTri.didHit){
+  if (!closestTri.didHit || depth > 4){
     return Vector3f(0.2, 0.7, 0.8);
   }
+
+  Vector3f reflect_dir = reflect(dir, closestTri.normal).normalize();
+  Vector3f reflect_orig = reflect_dir.dot(closestTri.normal) < 0 ? closestTri.position - closestTri.normal*1e-3 : closestTri.position + closestTri.normal*1e-3;
+  Vector3f reflect_color = castRay(reflect_orig, reflect_dir, tris, lights, depth + 1);
 
   float diffuse_light_intensity = 0, specular_light_intensity = 0;
 
@@ -201,7 +205,7 @@ Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::ve
     }
   }
 
-  return closestTri.material.color * diffuse_light_intensity + Vector3f(1,1,1) * specular_light_intensity;
+  return closestTri.material.color * diffuse_light_intensity * closestTri.material.albedo[0] + Vector3f(1,1,1) * specular_light_intensity * closestTri.material.albedo[1] + reflect_color*closestTri.material.albedo[2];
   
 }
 
@@ -239,8 +243,8 @@ int main(){
 
   std::vector<tri> triangles;
   
-  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(1,0,0), 0.2, Vector2f(0,0)))); // Red Test Triangle
-  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(0,1,0), 0.5, Vector2f(1,1)))); // Green Test Triangle
+  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(1,0,0), 0.2, Vector3f(1,0,0)))); // Red Test Triangle
+  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(0,1,0), 0.5, Vector3f(1,0.5,0.5)))); // Green Test Triangle
 
   std::vector<Light> lights;
 
