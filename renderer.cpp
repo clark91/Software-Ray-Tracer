@@ -7,6 +7,16 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 1280
 
+struct Vector2f{
+  float x, y;
+  Vector2f(float a=0, float b=0) : x(a), y(b) {}
+
+  float& operator[](size_t index) {
+    if (index > 1) throw std::out_of_range("Index out of range");
+    return (index == 0) ? x : y;
+  }
+};
+
 struct Vector3f {
   float x, y, z;
   Vector3f(float a = 0, float b = 0, float c = 0) : x(a), y(b), z(c) {}
@@ -55,7 +65,17 @@ struct Vector3f {
     return Vector3f(x * multiplier, y * multiplier, z * multiplier);
   }
 
+  Vector3f operator-() const{
+    return Vector3f(-x, -y, -z);
+  }
+
+
+
 };
+
+Vector3f reflect (Vector3f I, Vector3f N){
+  return (I - N * I.dot(N) * 2.f);
+}
 
 struct Light {
   Light(const Vector3f &p, const float &i) : position(p), intensity(i) {}
@@ -65,7 +85,10 @@ struct Light {
 
 struct Material{
   Vector3f color;
-  Material(Vector3f c) : color(c){}
+  Vector2f albedo;
+  float specular_exponent;
+
+  Material(Vector3f c, float s, Vector2f a) : color(c), specular_exponent(s),albedo(a){}
 
   Material() {};
 };
@@ -161,11 +184,13 @@ Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::ve
     return Vector3f(0.2, 0.7, 0.8);
   }
 
-  float diffuse_light_intensity = 0;
+  float diffuse_light_intensity = 0, specular_light_intensity = 0;
 
   for (size_t i = 0; i < lights.size(); i++){
     Vector3f light_dir = (lights[i].position - closestTri.position).normalize();
     diffuse_light_intensity += lights[i].intensity * std::max(0.f, closestTri.normal.dot(light_dir));
+
+    specular_light_intensity += powf(std::max(0.f, -reflect(-light_dir, closestTri.normal).dot(dir)), closestTri.material.specular_exponent)*lights[i].intensity;
 
     float light_distance = (lights[i].position - closestTri.position).magnitude();
     Vector3f shadow_orig = light_dir.dot(closestTri.normal) < 0 ? closestTri.position - closestTri.normal * 1e-3 : closestTri.position + closestTri.normal*1e-3;
@@ -176,7 +201,7 @@ Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::ve
     }
   }
 
-  return closestTri.material.color * diffuse_light_intensity;
+  return closestTri.material.color * diffuse_light_intensity + Vector3f(1,1,1) * specular_light_intensity;
   
 }
 
@@ -214,8 +239,8 @@ int main(){
 
   std::vector<tri> triangles;
   
-  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(1,0,0)))); // Red Test Triangle
-  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(0,1,0)))); // Green Test Triangle
+  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(1,0,0), Vector2f(0,0)))); // Red Test Triangle
+  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(0,1,0), Vector2f(1,1)))); // Green Test Triangle
 
   std::vector<Light> lights;
 
