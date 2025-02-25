@@ -4,11 +4,11 @@
 #include <string.h>
 #include <sstream>
 
-std::vector<tri> parseObj(){
+std::vector<tri> parseObj(std::string file, Material material){
   std::vector<Vector3f> vertices;
   std::vector<tri> tris;
 
-  std::ifstream objFile("teapot.obj");
+  std::ifstream objFile(file);
 
   std::string line;
   while (getline(objFile, line)){
@@ -28,7 +28,7 @@ std::vector<tri> parseObj(){
       tmpTri.b = vertices[std::stoi(tokens[1]) - 1];
       tmpTri.c = vertices[std::stoi(tokens[2]) - 1];
       tmpTri.updateEdges();
-      tmpTri.material = Material(Vector3f(0.9,0.1,0.0), 10., Vector3f(0.3,0.1,0.1));
+      tmpTri.material = material;
 
       tris.push_back(tmpTri);
 
@@ -61,7 +61,7 @@ std::vector<tri> parseObj(){
     std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
   }*/
 
-  for (tri tri : tris){
+  /*for (tri tri : tris){
     Vector3f vert = tri.a;
     std::cout << "Face: \n";
     std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
@@ -69,7 +69,7 @@ std::vector<tri> parseObj(){
     std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
     vert = tri.c;
     std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
-  }
+  }*/
 
 
   std::cout << "Faces: " << tris.size() << "\n";

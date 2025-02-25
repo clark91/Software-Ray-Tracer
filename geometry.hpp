@@ -156,4 +156,4 @@ struct tri{
   }
 };
 
-std::vector<tri> parseObj();
+std::vector<tri> parseObj(std::string file, Material material = Material(Vector3f(0.9,0.1,0.0), 10., Vector3f(0.3,0.1,0.1)));

@@ -4,6 +4,7 @@
 #include<algorithm>
 #include<cmath>
 #include<thread>
+#include<chrono>
 #include "geometry.hpp"
 
 #define SCREEN_WIDTH 1000
@@ -82,7 +83,7 @@ void renderTile(int startX, int endX, int startY, int endY, std::vector<tri> &tr
 void render(std::vector<tri> &tris, std::vector<Light> &lights) {
   const int width = SCREEN_WIDTH;
   const int height = SCREEN_HEIGHT;
-  const float fov = (120.f / 180.f) * M_PI;
+  const float fov = (90.f / 180.f) * M_PI;
 
   std::vector<Vector3f> framebuffer(width * height);
 
@@ -134,13 +135,22 @@ int main(){
   //triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), red_rubber)); 
   //triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), mirror)); 
 
-  std::vector<tri> triangles = parseObj();
-  
+  std::vector<tri> triangles = parseObj("untitled.obj");
+  std::vector<tri> teapot = parseObj("teapot.obj", mirror);
+
+  triangles.insert(std::end(triangles), std::begin(teapot), std::end(teapot));
 
   std::vector<Light> lights;
 
   lights.push_back(Light(Vector3f( 30, 50, -25),5.0f));
 
+  auto beg = std::chrono::high_resolution_clock::now();
+
   render(triangles, lights);
+
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - beg);
+
+  std::cout << "In " << duration.count() << " seconds\n";
   return 0;
 }
