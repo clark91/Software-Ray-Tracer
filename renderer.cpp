@@ -239,8 +239,8 @@ int main(){
 
   std::vector<tri> triangles;
   
-  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(1,0,0), Vector2f(0,0)))); // Red Test Triangle
-  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(0,1,0), Vector2f(1,1)))); // Green Test Triangle
+  triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(1,0,0), 0.2, Vector2f(0,0)))); // Red Test Triangle
+  triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), Material(Vector3f(0,1,0), 0.5, Vector2f(1,1)))); // Green Test Triangle
 
   std::vector<Light> lights;
 
