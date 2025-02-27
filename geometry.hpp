@@ -70,6 +70,16 @@ struct Vector3f {
 
 };
 
+struct Vector4f {
+  float x, y, z, j;
+  Vector4f(float a = 0, float b = 0, float c = 0, float d = 0) : x(a), y(b), z(c), j(d) {}
+
+  float& operator[](size_t index) {
+    if (index > 3) throw std::out_of_range("Index out of range");
+    return (index == 0) ? x : (index == 1) ? y : z;
+  }
+};
+
 struct Light {
   Light(const Vector3f &p, const float &i) : position(p), intensity(i) {}
   Vector3f position;
@@ -78,10 +88,11 @@ struct Light {
 
 struct Material{
   Vector3f color;
-  Vector3f albedo;
+  Vector4f albedo;
   float specular_exponent;
+  float refractive_index;
 
-  Material(Vector3f c, float s, Vector3f a) : color(c), specular_exponent(s),albedo(a){}
+  Material(Vector3f c, float s, Vector4f a, float r = 1) : color(c), specular_exponent(s),albedo(a), refractive_index(r){}
 
   Material() {};
 };
@@ -156,6 +167,6 @@ struct tri{
   }
 };
 
-std::vector<tri> parseObj(std::string file, Material material = Material(Vector3f(0.9,0.1,0.0), 10., Vector3f(0.3,0.1,0.1)));
+std::vector<tri> parseObj(std::string file, Material material = Material(Vector3f(0.9,0.1,0.0), 10., Vector4f(0.3,0.1,0.1, 0.0)), Vector3f offset = Vector3f(0,0,0));
 
 std::vector<std::string> parseLine(std::string input, char delim);
