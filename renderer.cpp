@@ -63,7 +63,7 @@ Vector3f castRay (Vector3f &orig, Vector3f &dir, std::vector<tri> &tris, std::ve
 
   Vector3f refract_dir = refract(dir, closestTri.normal, closestTri.material.refractive_index).normalize();
   Vector3f refract_orig = refract_dir.dot(closestTri.normal) < 0 ? closestTri.position - closestTri.normal*1e-3 : closestTri.position + closestTri.normal*1e-3;
-  Vector3f refract_color = castRay(refract_orig, reflect_dir, tris, lights, depth+1);
+  Vector3f refract_color = castRay(refract_orig, refract_dir, tris, lights, depth+1);
 
   float diffuse_light_intensity = 0, specular_light_intensity = 0;
 
