@@ -13,42 +13,35 @@ std::vector<tri> parseObj(std::string file, Material material){
   std::string line;
   while (getline(objFile, line)){
     if (line[0] == 'f'){
-      std::stringstream stringStream(line);
-      std::string token;
-      std::vector<std::string> tokens;
-
-      tri tmpTri;
-
-      while (getline(stringStream, token, ' ')){
-        if (token != "f"){
-          tokens.push_back(token);
-        }
+      std::vector<std::string> tokens = parseLine(line, ' ');
+      std::vector<std::string> triIds;
+      for (std::string t: tokens){
+        std::vector<std::string> triId = parseLine(t, '/');
+        triIds.push_back(triId[0]);
       }
-      tmpTri.a = vertices[std::stoi(tokens[0]) - 1];
-      tmpTri.b = vertices[std::stoi(tokens[1]) - 1];
-      tmpTri.c = vertices[std::stoi(tokens[2]) - 1];
-      tmpTri.updateEdges();
-      tmpTri.material = material;
 
-      tris.push_back(tmpTri);
+      for (int i = 0; i < tokens.size() -2; i++){
+        tri tmpTri;
+        tmpTri.a = vertices[std::stoi(triIds[0]) - 1];
+        tmpTri.b = vertices[std::stoi(triIds[i+1]) - 1];
+        tmpTri.c = vertices[std::stoi(triIds[i+2]) - 1];
+        tmpTri.updateEdges();
+        tmpTri.material = material;
+
+        tris.push_back(tmpTri);
+      }
+      
 
     } else if(line[0] == 'v' && line[1] == ' '){
       Vector3f vert;
-      std::stringstream stringStream(line);
-      std::string token;
-      std::vector<std::string> tokens;
+      std::vector<std::string> tokens = parseLine(line, ' ');
 
-      while (getline(stringStream, token, ' ')){
-        if (token != "v"){
-          tokens.push_back(token);
-        }
-      }
       float scale = 1.f;
       vert.x = std::stof(tokens[0]) * scale;
       vert.y = std::stof(tokens[1]) * scale;
       vert.z = std::stof(tokens[2]) * scale;
 
-      vert = vert + Vector3f(0,0,-5);
+      vert = vert + Vector3f(0,0,-4);
 
       vertices.push_back(vert);
     }
@@ -56,26 +49,23 @@ std::vector<tri> parseObj(std::string file, Material material){
 
   std::cout << "FILE READ\n";
   std::cout << "Vertices: " << vertices.size() << "\n";
-
-  /*for (Vector3f vert : vertices){
-    std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
-  }*/
-
-  /*for (tri tri : tris){
-    Vector3f vert = tri.a;
-    std::cout << "Face: \n";
-    std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
-    vert = tri.b;
-    std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
-    vert = tri.c;
-    std::cout << vert.x << " " << vert.y << " " << vert.z << "\n";
-  }*/
-
-
-  std::cout << "Faces: " << tris.size() << "\n";
+  std::cout << "Polygons: " << tris.size() << "\n";
 
   objFile.close();
   return tris;
+}
+
+std::vector<std::string> parseLine(std::string input, char delim){
+  std::stringstream ss(input);
+  std::vector<std::string> tokens;
+  std::string token;
+
+  while (getline(ss, token, delim)){
+    if (token != "f" && token != "v"){
+      tokens.push_back(token);
+    }
+  }
+  return tokens;
 }
 
 /*int main(int argc, char const *argv[])

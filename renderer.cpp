@@ -7,8 +7,8 @@
 #include<chrono>
 #include "geometry.hpp"
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 720
+#define SCREEN_HEIGHT 720
 
 Vector3f reflect (Vector3f I, Vector3f N){
   return (I - N * I.dot(N) * 2.f);
@@ -83,7 +83,7 @@ void renderTile(int startX, int endX, int startY, int endY, std::vector<tri> &tr
 void render(std::vector<tri> &tris, std::vector<Light> &lights) {
   const int width = SCREEN_WIDTH;
   const int height = SCREEN_HEIGHT;
-  const float fov = (90.f / 180.f) * M_PI;
+  const float fov = (45.f / 180.f) * M_PI;
 
   std::vector<Vector3f> framebuffer(width * height);
 
@@ -135,10 +135,16 @@ int main(){
   //triangles.push_back(tri(Vector3f(8.0,-1.5,-4.9), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), red_rubber)); 
   //triangles.push_back(tri(Vector3f(8.0,1.5,-5), Vector3f(-1,1.5,-5), Vector3f(1,0,-5), mirror)); 
 
-  std::vector<tri> triangles = parseObj("untitled.obj");
-  std::vector<tri> teapot = parseObj("teapot.obj", mirror);
+  std::vector<tri> triangles;
 
-  triangles.insert(std::end(triangles), std::begin(teapot), std::end(teapot));
+  std::vector<tri> monkey = parseObj("monkey.obj", mirror);
+  triangles.insert(std::end(triangles), std::begin(monkey), std::end(monkey));
+
+  //std::vector<tri> teapot = parseObj("teapot.obj", mirror);
+  //triangles.insert(std::end(triangles), std::begin(teapot), std::end(teapot));
+
+  //std::vector<tri> cube = parseObj("cube.obj");
+  //triangles.insert(std::end(triangles), std::begin(cube), std::end(cube));
 
   std::vector<Light> lights;
 
